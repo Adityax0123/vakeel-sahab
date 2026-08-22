@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lawyer Dashboard | Vakeel Sahab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/dashboard.css">
+<style>
+  header.topbar{background:var(--navy); color:var(--paper); padding:18px 28px; display:flex; align-items:center; justify-content:space-between;}
+  main{max-width:960px; margin:0 auto; padding:36px 20px 80px;}
+  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:6px;}
+  .consult-card{padding:18px; margin-bottom:14px;}
+  .consult-meta{font-size:12px; color:rgba(42,40,35,0.5); margin-top:6px;}
+  .actions-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  select{padding:8px 10px; font-size:13px;}
+  .reply-box{display:flex; gap:8px; margin-top:12px;}
+  .reply-box input{flex:1; padding:8px 10px; font-size:13px;}
+  .note-item{font-size:13px; background:var(--paper-2); padding:8px 10px; border-radius:3px; margin-top:6px;}
+  .tabs{display:flex; gap:6px; margin-bottom:18px;}
+  .tab-link{padding:8px 16px; font-size:13px; border:1px solid rgba(42,40,35,0.15); background:#fff; cursor:pointer;}
+  .tab-link.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="font-display" style="font-size:20px;">Vakeel <span class="text-gold" style="font-style:italic;">Sahab</span> — Lawyer</span>
+  <div style="display:flex; align-items:center; gap:16px; font-size:13px;">
+    <span id="welcome-name"></span>
+    <button id="logout-btn" class="btn-outline" style="padding:6px 14px; color:var(--paper); border-color:rgba(247,244,238,0.3);">Log Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab-link active" data-tab="queries">Client Queries</button>
+    <button class="tab-link" data-tab="profile">Edit Profile</button>
+  </div>
+
+  <section id="tab-queries">
+    <p class="section-title">Assigned To Me</p>
+    <h2 class="font-display" style="font-size:26px; margin:0 0 16px;">Client Consultations</h2>
+    <div id="consultations-list"><p style="color:rgba(42,40,35,0.5); font-size:14px;">Loading...</p></div>
+  </section>
+
+  <section id="tab-profile" style="display:none;">
+    <p class="section-title">My Profile</p>
+    <h2 class="font-display" style="font-size:26px; margin:0 0 16px;">Edit Profile</h2>
+    <form id="profile-form" class="card" style="padding:22px; max-width:520px;">
+      <div style="margin-bottom:14px;"><label style="font-size:12px; text-transform:uppercase;">Specialization</label>
+        <input type="text" id="p-specialization" style="width:100%; padding:9px; margin-top:4px;" /></div>
+      <div style="margin-bottom:14px;"><label style="font-size:12px; text-transform:uppercase;">Designation</label>
+        <input type="text" id="p-designation" style="width:100%; padding:9px; margin-top:4px;" /></div>
+      <div style="margin-bottom:14px;"><label style="font-size:12px; text-transform:uppercase;">Experience (years)</label>
+        <input type="number" id="p-experience" style="width:100%; padding:9px; margin-top:4px;" /></div>
+      <div style="margin-bottom:14px;"><label style="font-size:12px; text-transform:uppercase;">Office Location</label>
+        <input type="text" id="p-location" style="width:100%; padding:9px; margin-top:4px;" /></div>
+      <div style="margin-bottom:14px;"><label style="font-size:12px; text-transform:uppercase;">Bio</label>
+        <textarea id="p-bio" rows="4" style="width:100%; padding:9px; margin-top:4px;"></textarea></div>
+      <button type="submit" class="btn-primary" style="padding:10px 22px;">Save Changes</button>
+      <span id="profile-success" style="display:none; color:#1E6B36; margin-left:12px; font-size:13px;">Saved.</span>
+    </form>
+  </section>
+</main>
+
+<script src="js/api.js"></script>
+<script>
+  const user = guardPage('lawyer');
+  if (user) document.getElementById('welcome-name').textContent = `Welcome, ${user.name}`;
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    clearSession();
+    window.location.href = 'login.html';
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-queries').style.display = btn.dataset.tab === 'queries' ? 'block' : 'none';
+      document.getElementById('tab-profile').style.display = btn.dataset.tab === 'profile' ? 'block' : 'none';
+    });
+  });
+
+  function statusBadge(status) {
+    return `<span class="badge badge-${status}">${status.replace('_',' ')}</span>`;
+  }
+
+  async function loadConsultations() {
+    const listEl = document.getElementById('consultations-list');
+    try {
+      const items = await apiRequest('/lawyer/consultations');
+      if (items.length === 0) {
+        listEl.innerHTML = `<p style="color:rgba(42,40,35,0.5); font-size:14px;">No client queries assigned yet.</p>`;
+        return;
+      }
+      listEl.innerHTML = items.map(c => `
+        <div class="card consult-card" data-id="${c.id}">
+          <div style="display:flex; justify-content:space-between; align-items:start; gap:12px;">
+            <div>
+              <strong>${c.service || 'General Enquiry'}</strong>
+              <p style="margin:6px 0 0; font-size:14px;">${c.message}</p>
+              <p class="consult-meta">${c.client_name || 'Client'} (${c.client_email || 'no email'}) · ${new Date(c.created_at).toLocaleDateString()}</p>
+            </div>
+            ${statusBadge(c.status)}
+          </div>
+          <div class="actions-row">
+            <select class="status-select">
+              <option value="pending" ${c.status==='pending'?'selected':''}>Pending</option>
+              <option value="in_progress" ${c.status==='in_progress'?'selected':''}>In Progress</option>
+              <option value="completed" ${c.status==='completed'?'selected':''}>Completed</option>
+              <option value="cancelled" ${c.status==='cancelled'?'selected':''}>Cancelled</option>
+            </select>
+            <button class="btn-outline update-status-btn" style="padding:6px 14px; font-size:13px;">Update Status</button>
+          </div>
+          <div class="reply-box">
+            <input type="text" class="note-input" placeholder="Write a reply to the client..." />
+            <button class="btn-primary send-note-btn" style="padding:8px 16px; font-size:13px;">Send</button>
+          </div>
+          <div class="notes-container"></div>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.update-status-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const cardEl = e.target.closest('.consult-card');
+          const id = cardEl.dataset.id;
+          const status = cardEl.querySelector('.status-select').value;
+          try {
+            await apiRequest(`/lawyer/consultations/${id}/status`, { method: 'PATCH', body: { status } });
+            loadConsultations();
+          } catch (err) { alert(err.message); }
+        });
+      });
+
+      listEl.querySelectorAll('.send-note-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const cardEl = e.target.closest('.consult-card');
+          const id = cardEl.dataset.id;
+          const input = cardEl.querySelector('.note-input');
+          if (!input.value.trim()) return;
+          try {
+            await apiRequest(`/lawyer/consultations/${id}/notes`, { method: 'POST', body: { note: input.value } });
+            input.value = '';
+            alert('Reply sent to client.');
+          } catch (err) { alert(err.message); }
+        });
+      });
+    } catch (err) {
+      listEl.innerHTML = `<p style="color:#8A1D1D; font-size:14px;">${err.message}</p>`;
+    }
+  }
+
+  document.getElementById('profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await apiRequest('/lawyer/profile', {
+        method: 'PUT',
+        body: {
+          specialization: document.getElementById('p-specialization').value,
+          designation: document.getElementById('p-designation').value,
+          experienceYears: Number(document.getElementById('p-experience').value) || null,
+          officeLocation: document.getElementById('p-location').value,
+          bio: document.getElementById('p-bio').value,
+        },
+      });
+      const successEl = document.getElementById('profile-success');
+      successEl.style.display = 'inline';
+      setTimeout(() => { successEl.style.display = 'none'; }, 3000);
+    } catch (err) { alert(err.message); }
+  });
+
+  loadConsultations();
+</script>
+</body>
+</html>

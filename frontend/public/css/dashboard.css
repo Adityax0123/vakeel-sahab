@@ -1,0 +1,50 @@
+:root{
+  --navy:#0F1B2D;
+  --navy-2:#16273D;
+  --gold:#B8935A;
+  --gold-light:#D9BD8C;
+  --paper:#F7F4EE;
+  --paper-2:#EFEAE0;
+  --charcoal:#2A2823;
+  --hairline: rgba(184,147,90,0.35);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--charcoal);
+  font-family:'Inter',sans-serif;
+}
+.font-display{font-family:'Cormorant Garamond', serif;}
+.navy-bg{background:var(--navy);}
+.text-gold{color:var(--gold);}
+.bg-gold{background:var(--gold);}
+.border-hair{border-color:var(--hairline);}
+.btn-primary{
+  background:var(--gold); color:var(--navy); font-weight:600;
+  border:none; cursor:pointer; transition:background .2s ease;
+}
+.btn-primary:hover{background:var(--gold-light);}
+.btn-outline{
+  background:transparent; border:1px solid rgba(42,40,35,0.25); color:var(--charcoal);
+  cursor:pointer; transition:border-color .2s ease;
+}
+.btn-outline:hover{border-color:var(--gold);}
+input, select, textarea{
+  border:1px solid rgba(42,40,35,0.2);
+  background:#fff;
+}
+input:focus, select:focus, textarea:focus{
+  outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);
+}
+.card{
+  background:#fff; border:1px solid var(--hairline); border-radius:2px;
+}
+.badge{
+  display:inline-block; padding:2px 10px; border-radius:999px; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.05em; font-weight:600;
+}
+.badge-pending{background:#FBEFD9; color:#8A5A00;}
+.badge-in_progress{background:#DCE8F5; color:#1D4E89;}
+.badge-completed{background:#DFF3E3; color:#1E6B36;}
+.badge-cancelled{background:#F5DCDC; color:#8A1D1D;}

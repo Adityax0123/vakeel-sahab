@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login | Vakeel Sahab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/dashboard.css">
+<style>
+  body{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--navy); padding:20px;
+  }
+  .login-box{
+    width:100%; max-width:420px; background:var(--paper);
+    border:1px solid var(--hairline); border-radius:2px; padding:40px 36px;
+  }
+  .tab-row{display:flex; gap:8px; margin-bottom:28px;}
+  .tab-btn{
+    flex:1; padding:8px 0; font-size:12px; text-transform:uppercase; letter-spacing:.05em;
+    background:transparent; border:1px solid rgba(42,40,35,0.15); cursor:pointer; color:var(--charcoal);
+  }
+  .tab-btn.active{background:var(--navy); color:var(--paper); border-color:var(--navy);}
+  label{font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:rgba(42,40,35,0.6);}
+  input{width:100%; padding:10px 12px; margin-top:6px; margin-bottom:16px; font-size:14px;}
+  .error-msg{color:#8A1D1D; font-size:13px; margin-bottom:14px; display:none;}
+  .submit-btn{width:100%; padding:12px; font-size:14px; letter-spacing:.03em;}
+  .hint{font-size:12px; color:rgba(42,40,35,0.5); margin-top:18px; text-align:center; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <p style="text-align:center; letter-spacing:.18em; text-transform:uppercase; font-size:12px; color:var(--gold); margin:0 0 6px;">Ref. No. VS/2026</p>
+  <h1 class="font-display" style="text-align:center; font-size:28px; margin:0 0 28px;">Vakeel <span class="text-gold" style="font-style:italic;">Sahab</span></h1>
+
+  <div class="tab-row">
+    <button class="tab-btn active" data-mode="login">Login</button>
+    <button class="tab-btn" data-mode="register">Client Sign Up</button>
+  </div>
+
+  <!-- LOGIN FORM (works for client, lawyer, developer, admin) -->
+  <form id="login-form">
+    <p class="error-msg" id="login-error"></p>
+    <label>Email</label>
+    <input type="email" id="login-email" required />
+    <label>Password</label>
+    <input type="password" id="login-password" required />
+    <button type="submit" class="btn-primary submit-btn">Log In</button>
+  </form>
+
+  <!-- REGISTER FORM (clients only, per backend design) -->
+  <form id="register-form" style="display:none;">
+    <p class="error-msg" id="register-error"></p>
+    <label>Full Name</label>
+    <input type="text" id="reg-name" required />
+    <label>Phone</label>
+    <input type="tel" id="reg-phone" />
+    <label>Email</label>
+    <input type="email" id="reg-email" required />
+    <label>Password</label>
+    <input type="password" id="reg-password" required minlength="6" />
+    <button type="submit" class="btn-primary submit-btn">Create Client Account</button>
+  </form>
+
+  <p class="hint">Lawyer and website-developer accounts are created by the Vakeel Sahab team.<br>Contact admin if you need dashboard access.</p>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const mode = btn.dataset.mode;
+      document.getElementById('login-form').style.display = mode === 'login' ? 'block' : 'none';
+      document.getElementById('register-form').style.display = mode === 'register' ? 'block' : 'none';
+    });
+  });
+
+  function redirectByRole(role) {
+    window.location.href = `dashboard-${role}.html`;
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('login-error');
+    errorEl.style.display = 'none';
+    try {
+      const data = await apiRequest('/auth/login', {
+        method: 'POST',
+        auth: false,
+        body: {
+          email: document.getElementById('login-email').value,
+          password: document.getElementById('login-password').value,
+        },
+      });
+      setSession(data.token, data.user);
+      redirectByRole(data.user.role);
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    }
+  });
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('register-error');
+    errorEl.style.display = 'none';
+    try {
+      const data = await apiRequest('/auth/register', {
+        method: 'POST',
+        auth: false,
+        body: {
+          name: document.getElementById('reg-name').value,
+          phone: document.getElementById('reg-phone').value,
+          email: document.getElementById('reg-email').value,
+          password: document.getElementById('reg-password').value,
+        },
+      });
+      setSession(data.token, data.user);
+      redirectByRole(data.user.role);
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.style.display = 'block';
+    }
+  });
+
+  // If already logged in, skip straight to dashboard
+  const existing = getUser();
+  if (existing && getToken()) redirectByRole(existing.role);
+</script>
+</body>
+</html>

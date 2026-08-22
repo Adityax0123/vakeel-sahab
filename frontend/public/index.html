@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vakeel Sahab | [Enter Tagline Here]</title>
+<meta name="description" content="Vakeel Sahab — professional legal guidance and digital solutions. [Enter meta description here]." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{
+    --navy:#0F1B2D;
+    --navy-2:#16273D;
+    --gold:#B8935A;
+    --gold-light:#D9BD8C;
+    --paper:#F7F4EE;
+    --paper-2:#EFEAE0;
+    --charcoal:#2A2823;
+    --hairline: rgba(184,147,90,0.35);
+  }
+  *{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--charcoal);
+    font-family:'Inter',sans-serif;
+  }
+  .font-display{font-family:'Cormorant Garamond', serif;}
+  .navy-bg{background:var(--navy);}
+  .navy2-bg{background:var(--navy-2);}
+  .text-gold{color:var(--gold);}
+  .bg-gold{background:var(--gold);}
+  .border-gold{border-color:var(--gold);}
+  .hairline{border-color:var(--hairline);}
+
+  /* Docket-style article numbering — a genuine legal-document convention, used as the section identity */
+  .article-mark{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:0.95rem;
+    letter-spacing:0.18em;
+    color:var(--gold);
+    text-transform:uppercase;
+  }
+  .article-rule{
+    display:flex;align-items:center;gap:1rem;
+    margin-bottom:1.25rem;
+  }
+  .article-rule::after{
+    content:"";
+    flex:1;height:1px;
+    background:linear-gradient(to right, var(--hairline), transparent);
+  }
+
+  .seal{
+    width:56px;height:56px;border:1px solid var(--gold);
+    border-radius:9999px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* Reveal on scroll */
+  .reveal{opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  .card-lift{transition:transform .35s ease, box-shadow .35s ease, border-color .35s ease;}
+  .card-lift:hover{transform:translateY(-6px); box-shadow:0 20px 40px -20px rgba(15,27,45,0.35); border-color:var(--gold);}
+
+  .btn-primary{
+    background:var(--gold); color:var(--navy); font-weight:600;
+    transition:background .25s ease, transform .2s ease;
+  }
+  .btn-primary:hover{background:var(--gold-light); transform:translateY(-2px);}
+
+  .btn-outline{
+    border:1px solid rgba(247,244,238,0.4); color:var(--paper);
+    transition:border-color .25s ease, background .25s ease;
+  }
+  .btn-outline:hover{border-color:var(--gold); background:rgba(184,147,90,0.08);}
+
+  .nav-link{position:relative;}
+  .nav-link::after{
+    content:""; position:absolute; left:0; bottom:-6px; width:0; height:1px;
+    background:var(--gold); transition:width .3s ease;
+  }
+  .nav-link:hover::after{width:100%;}
+
+  .faq-item.open .faq-icon{transform:rotate(45deg);}
+  .faq-item .faq-answer{max-height:0; overflow:hidden; transition:max-height .35s ease, padding .35s ease;}
+  .faq-item.open .faq-answer{max-height:400px;}
+
+  .profile-panel{max-height:0; overflow:hidden; transition:max-height .5s ease;}
+  .profile-panel.open{max-height:1400px;}
+
+  #whatsapp-float{
+    box-shadow:0 10px 30px -10px rgba(15,27,45,0.5);
+    transition:transform .25s ease;
+  }
+  #whatsapp-float:hover{transform:scale(1.06);}
+
+  input, select, textarea{
+    background:rgba(255,255,255,0.6);
+    border:1px solid rgba(42,40,35,0.18);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{transition:none; opacity:1; transform:none;}
+    *{scroll-behavior:auto;}
+  }
+</style>
+
+<!-- API base for this static site — point to your deployed backend -->
+<script>window.API_BASE = window.API_BASE || 'http://localhost:5050/api';</script>
+<style>
+  #chat-toggle{
+    position:fixed; bottom:24px; left:24px; width:56px; height:56px; border-radius:50%;
+    background:var(--gold); border:none; cursor:pointer; box-shadow:0 10px 24px rgba(0,0,0,0.3);
+    font-size:22px; z-index:60;
+  }
+  #chat-panel{
+    position:fixed; bottom:92px; left:24px; width:320px; max-width:88vw; height:420px;
+    background:#fff; border:1px solid var(--hairline); border-radius:4px; display:none;
+    flex-direction:column; z-index:60; box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  #chat-panel.open{display:flex;}
+  #chat-header{background:var(--navy); color:#F7F4EE; padding:12px 16px; font-size:14px; font-weight:600;}
+  #chat-messages{flex:1; overflow-y:auto; padding:12px; font-size:13px;}
+  .msg{margin-bottom:10px; line-height:1.5;}
+  .msg.user{text-align:right;}
+  .msg.user span{background:var(--navy); color:#fff; padding:6px 10px; border-radius:10px 10px 0 10px; display:inline-block;}
+  .msg.assistant span{background:var(--paper-2,#EFEAE0); padding:6px 10px; border-radius:10px 10px 10px 0; display:inline-block;}
+  #chat-input-row{display:flex; border-top:1px solid var(--hairline);}
+  #chat-input{flex:1; border:none; padding:10px; font-size:13px;}
+  #chat-send{border:none; background:var(--gold); padding:0 16px; cursor:pointer; font-weight:600;}
+</style>
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<header id="navbar" class="fixed top-0 left-0 right-0 z-50 navy-bg/95 backdrop-blur border-b hairline transition-all">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between h-16 md:h-20">
+    <a href="#home" class="flex items-center gap-3">
+      <span class="seal shrink-0">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B8935A" stroke-width="1.4">
+          <path d="M12 2v20M4 7h16M6 7l-3 6a3 3 0 006 0l-3-6zm12 0l-3 6a3 3 0 006 0l-3-6zM8 21h8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="font-display text-2xl md:text-3xl text-paper tracking-wide" style="color:#F7F4EE;">Vakeel <span class="text-gold italic">Sahab</span></span>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-8 text-sm tracking-wide" style="color:#EDE7DC;">
+      <a href="#home" class="nav-link">Home</a>
+      <a href="#about" class="nav-link">About</a>
+      <a href="#lawyers" class="nav-link">Our Lawyers</a>
+      <a href="#services" class="nav-link">Services</a>
+      <a href="#why" class="nav-link">Why Choose Us</a>
+      <a href="#testimonials" class="nav-link">Testimonials</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden lg:flex items-center gap-3">
+      <a href="login.html" class="text-sm nav-link" style="color:#EDE7DC;">Client / Lawyer / Developer Login</a>
+      <a href="#contact" class="btn-primary text-sm px-5 py-2.5 rounded-sm">Book a Consultation</a>
+    </div>
+
+    <button id="menu-btn" aria-label="Open menu" aria-expanded="false" class="lg:hidden text-paper p-2" style="color:#F7F4EE;">
+      <svg id="menu-icon-open" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/></svg>
+      <svg id="menu-icon-close" class="hidden" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu" class="hidden lg:hidden navy2-bg border-t hairline">
+    <nav class="flex flex-col px-6 py-4 gap-4 text-sm" style="color:#EDE7DC;">
+      <a href="#home" class="mobile-link py-1">Home</a>
+      <a href="#about" class="mobile-link py-1">About</a>
+      <a href="#lawyers" class="mobile-link py-1">Our Lawyers</a>
+      <a href="#services" class="mobile-link py-1">Services</a>
+      <a href="#why" class="mobile-link py-1">Why Choose Us</a>
+      <a href="#testimonials" class="mobile-link py-1">Testimonials</a>
+      <a href="#faq" class="mobile-link py-1">FAQ</a>
+      <a href="#contact" class="mobile-link py-1">Contact</a>
+      <a href="login.html" class="mobile-link py-1 text-gold">Client / Lawyer / Developer Login</a>
+      <a href="#contact" class="btn-primary text-center px-5 py-2.5 rounded-sm mt-2">Book a Consultation</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section id="home" class="navy-bg relative overflow-hidden pt-32 pb-24 md:pt-44 md:pb-32">
+  <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background-image:radial-gradient(circle at 20% 20%, #B8935A 0, transparent 40%), radial-gradient(circle at 80% 60%, #B8935A 0, transparent 35%);"></div>
+  <div class="max-w-7xl mx-auto px-5 md:px-8 relative">
+    <p class="article-mark reveal">Ref. No. VS/2026 — Est. [Year]</p>
+    <h1 class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.08] mt-5 max-w-4xl reveal" style="color:#F7F4EE;">
+      [Enter Main Headline Here] <span class="text-gold italic">— Trusted Legal & Professional Services Under One Roof.</span>
+    </h1>
+    <p class="mt-6 max-w-2xl text-base md:text-lg leading-relaxed reveal" style="color:#C9C2B4;">
+      [Enter short description here] — Connect with experienced professionals for legal guidance, transport-related matters and modern digital solutions.
+    </p>
+
+    <div class="mt-9 flex flex-wrap gap-4 reveal">
+      <a href="#contact" class="btn-primary px-7 py-3.5 rounded-sm text-sm tracking-wide">Book a Consultation</a>
+      <a href="#contact" class="btn-outline px-7 py-3.5 rounded-sm text-sm tracking-wide">Contact Us</a>
+    </div>
+
+    <div class="mt-14 flex flex-wrap gap-x-10 gap-y-4 text-sm reveal" style="color:#C9C2B4;">
+      <div class="flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8935A" stroke-width="1.6"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        [Phone Number]
+      </div>
+      <div class="flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8935A" stroke-width="1.6"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        WhatsApp: [WhatsApp Number]
+      </div>
+      <div class="flex items-center gap-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8935A" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="3"/></svg>
+        [City / Office Location]
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ABOUT ===================== -->
+<section id="about" class="py-24 md:py-32 bg-[var(--paper)]">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 grid md:grid-cols-12 gap-12">
+    <div class="md:col-span-5 reveal">
+      <p class="article-mark mb-3">Article I — Who We Are</p>
+      <h2 class="font-display text-3xl md:text-4xl leading-tight">About <span class="text-gold italic">Vakeel Sahab</span></h2>
+      <p class="mt-6 text-[15px] leading-relaxed text-black/70">
+        [Enter company/team description here.] Vakeel Sahab brings together experienced legal professionals and a dedicated digital-services specialist under one accessible platform — built on clarity, discretion and practical outcomes.
+      </p>
+      <p class="mt-4 text-[15px] leading-relaxed text-black/70">
+        [Enter vision, values and purpose of Vakeel Sahab here.]
+      </p>
+    </div>
+    <div class="md:col-span-7 reveal">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div class="border hairline rounded-sm p-6 bg-white/60">
+          <p class="font-display text-xl mb-1">Professional Expertise</p>
+          <p class="text-sm text-black/60 leading-relaxed">Guidance from professionals with real domain experience, not generic advice.</p>
+        </div>
+        <div class="border hairline rounded-sm p-6 bg-white/60">
+          <p class="font-display text-xl mb-1">Client-Focused Approach</p>
+          <p class="text-sm text-black/60 leading-relaxed">Every matter is treated on its own terms, with attention to your specific need.</p>
+        </div>
+        <div class="border hairline rounded-sm p-6 bg-white/60">
+          <p class="font-display text-xl mb-1">Transparency</p>
+          <p class="text-sm text-black/60 leading-relaxed">Clear communication about process, scope and next steps at every stage.</p>
+        </div>
+        <div class="border hairline rounded-sm p-6 bg-white/60">
+          <p class="font-display text-xl mb-1">Confidentiality</p>
+          <p class="text-sm text-black/60 leading-relaxed">Your information and matters are handled with strict discretion.</p>
+        </div>
+        <div class="border hairline rounded-sm p-6 bg-white/60">
+          <p class="font-display text-xl mb-1">Fast Communication</p>
+          <p class="text-sm text-black/60 leading-relaxed">Prompt responses across phone, WhatsApp and email.</p>
+        </div>
+        <div class="border hairline rounded-sm p-6 bg-white/60">
+          <p class="font-display text-xl mb-1">Practical Solutions</p>
+          <p class="text-sm text-black/60 leading-relaxed">Advice and assistance aimed at workable, real-world outcomes.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== OUR LAWYERS ===================== -->
+<section id="lawyers" class="py-24 md:py-32 navy-bg">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="article-rule reveal">
+      <p class="article-mark">Article II — Our Professionals</p>
+    </div>
+    <h2 class="font-display text-3xl md:text-4xl reveal" style="color:#F7F4EE;">Meet the <span class="text-gold italic">Team</span></h2>
+
+    <div class="grid md:grid-cols-3 gap-7 mt-14">
+
+      <!-- Lawyer 1 -->
+      <article class="reveal card-lift border hairline rounded-sm overflow-hidden navy2-bg">
+        <div class="aspect-[4/5] bg-black/20 flex items-center justify-center text-white/30 text-sm">[Lawyer 1 Photo]</div>
+        <div class="p-6">
+          <p class="text-xs tracking-widest uppercase text-gold">Transport & Motor Vehicle Services</p>
+          <h3 class="font-display text-2xl mt-2" style="color:#F7F4EE;">[Lawyer 1 Name]</h3>
+          <p class="text-sm mt-1" style="color:#B7AF9E;">[Designation] · [X Years] Experience</p>
+          <p class="text-sm mt-4 leading-relaxed" style="color:#C9C2B4;">[Enter a one-line summary of Lawyer 1's practice here.]</p>
+          <div class="flex gap-3 mt-6">
+            <button class="view-profile-btn btn-primary text-xs px-4 py-2.5 rounded-sm" data-target="profile-1">View Profile</button>
+            <a href="#contact" class="btn-outline text-xs px-4 py-2.5 rounded-sm">Contact</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Lawyer 2 -->
+      <article class="reveal card-lift border hairline rounded-sm overflow-hidden navy2-bg">
+        <div class="aspect-[4/5] bg-black/20 flex items-center justify-center text-white/30 text-sm">[Lawyer 2 Photo]</div>
+        <div class="p-6">
+          <p class="text-xs tracking-widest uppercase text-gold">[Specialization]</p>
+          <h3 class="font-display text-2xl mt-2" style="color:#F7F4EE;">[Lawyer 2 Name]</h3>
+          <p class="text-sm mt-1" style="color:#B7AF9E;">[Designation] · [X Years] Experience</p>
+          <p class="text-sm mt-4 leading-relaxed" style="color:#C9C2B4;">[Enter a one-line summary of Lawyer 2's practice here.]</p>
+          <div class="flex gap-3 mt-6">
+            <button class="view-profile-btn btn-primary text-xs px-4 py-2.5 rounded-sm" data-target="profile-2">View Profile</button>
+            <a href="#contact" class="btn-outline text-xs px-4 py-2.5 rounded-sm">Contact</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Lawyer 3 / Website Specialist -->
+      <article class="reveal card-lift border hairline rounded-sm overflow-hidden navy2-bg">
+        <div class="aspect-[4/5] bg-black/20 flex items-center justify-center text-white/30 text-sm">[Lawyer 3 Photo]</div>
+        <div class="p-6">
+          <p class="text-xs tracking-widest uppercase text-gold">Website Development & Digital Solutions</p>
+          <h3 class="font-display text-2xl mt-2" style="color:#F7F4EE;">[Lawyer 3 Name]</h3>
+          <p class="text-sm mt-1" style="color:#B7AF9E;">[Designation / Role] · [X Years] Experience</p>
+          <p class="text-sm mt-4 leading-relaxed" style="color:#C9C2B4;">[Enter a one-line summary of digital services offered here.]</p>
+          <div class="flex gap-3 mt-6">
+            <button class="view-profile-btn btn-primary text-xs px-4 py-2.5 rounded-sm" data-target="profile-3">View Profile</button>
+            <a href="#contact" class="btn-outline text-xs px-4 py-2.5 rounded-sm">Contact</a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Expandable full profiles -->
+    <div class="mt-10 space-y-4">
+
+      <div id="profile-1" class="profile-panel border-t hairline pt-8">
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <h4 class="font-display text-2xl text-gold mb-3">About [Lawyer 1 Name]</h4>
+            <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter Lawyer 1 biography here.]</p>
+            <div class="grid grid-cols-2 gap-4 mt-6 text-sm" style="color:#C9C2B4;">
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Qualifications</p>[Enter Qualifications]</div>
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Bar Registration</p>[Enter Registration Details]</div>
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Phone</p>[Phone Number]</div>
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Email</p>[Email]</div>
+            </div>
+          </div>
+          <div>
+            <h4 class="font-display text-2xl text-gold mb-3">Services</h4>
+            <ul class="grid sm:grid-cols-2 gap-2 text-sm" style="color:#C9C2B4;">
+              <li>— Motor Vehicle Act related matters</li>
+              <li>— Transport department matters</li>
+              <li>— Vehicle registration assistance</li>
+              <li>— RC-related issues</li>
+              <li>— Driving licence related matters</li>
+              <li>— Challan-related assistance</li>
+              <li>— Commercial vehicle documentation</li>
+              <li>— Permit-related matters</li>
+              <li>— Fitness certificate related matters</li>
+              <li>— Vehicle transfer assistance</li>
+              <li>— Insurance/legal documentation</li>
+              <li>— [Add other services]</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-2" class="profile-panel border-t hairline pt-8">
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <h4 class="font-display text-2xl text-gold mb-3">About [Lawyer 2 Name]</h4>
+            <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter Lawyer 2 biography here.]</p>
+            <div class="grid grid-cols-2 gap-4 mt-6 text-sm" style="color:#C9C2B4;">
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Qualifications</p>[Enter Qualifications]</div>
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Bar Registration</p>[Enter Registration Details]</div>
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Phone</p>[Phone Number]</div>
+              <div><p class="text-gold text-xs uppercase tracking-wide mb-1">Email</p>[Email]</div>
+            </div>
+          </div>
+          <div>
+            <h4 class="font-display text-2xl text-gold mb-3">Services</h4>
+            <ul class="grid sm:grid-cols-2 gap-2 text-sm" style="color:#C9C2B4;">
+              <li>— [Service 1]</li>
+              <li>— [Service 2]</li>
+              <li>— [Service 3]</li>
+              <li>— [Service 4]</li>
+              <li>— [Service 5]</li>
+              <li>— [Service 6]</li>
+              <li>— [Service 7]</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-3" class="profile-panel border-t hairline pt-8">
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <h4 class="font-display text-2xl text-gold mb-3">About [Lawyer 3 Name]</h4>
+            <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter biography here.]</p>
+            <div class="mt-6 text-sm" style="color:#C9C2B4;">
+              <p class="text-gold text-xs uppercase tracking-wide mb-1">Skills / Technologies</p>
+              <p>[HTML, CSS, JavaScript, React, WordPress, etc.]</p>
+            </div>
+            <h4 class="font-display text-xl text-gold mt-8 mb-3">Portfolio</h4>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div class="border hairline rounded-sm p-4">
+                <p class="text-sm font-semibold" style="color:#F7F4EE;">[Project Name]</p>
+                <p class="text-xs mt-1" style="color:#B7AF9E;">[Project Description]</p>
+                <a href="#" class="text-xs text-gold mt-2 inline-block">[Project Link] →</a>
+              </div>
+              <div class="border hairline rounded-sm p-4">
+                <p class="text-sm font-semibold" style="color:#F7F4EE;">[Project Name]</p>
+                <p class="text-xs mt-1" style="color:#B7AF9E;">[Project Description]</p>
+                <a href="#" class="text-xs text-gold mt-2 inline-block">[Project Link] →</a>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h4 class="font-display text-2xl text-gold mb-3">Services</h4>
+            <ul class="grid sm:grid-cols-2 gap-2 text-sm" style="color:#C9C2B4;">
+              <li>— Business website development</li>
+              <li>— Lawyer/Legal firm websites</li>
+              <li>— Portfolio websites</li>
+              <li>— E-commerce websites</li>
+              <li>— Landing pages</li>
+              <li>— Website redesign</li>
+              <li>— Responsive website development</li>
+              <li>— Domain & hosting assistance</li>
+              <li>— Website maintenance</li>
+              <li>— SEO basics</li>
+              <li>— Google Business/Profile setup</li>
+              <li>— [Add other services]</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SERVICES ===================== -->
+<section id="services" class="py-24 md:py-32">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="article-rule reveal"><p class="article-mark">Article III — Services</p></div>
+    <h2 class="font-display text-3xl md:text-4xl reveal">What We <span class="text-gold italic">Offer</span></h2>
+
+    <div class="grid md:grid-cols-3 gap-10 mt-14">
+      <div class="reveal">
+        <p class="text-xs tracking-widest uppercase text-black/40 mb-4">Legal Services</p>
+        <div class="space-y-4">
+          <div class="border hairline rounded-sm p-5 card-lift bg-white/70">
+            <p class="font-display text-lg">[Service Name]</p>
+            <p class="text-sm text-black/60 mt-1 leading-relaxed">[Short explanation]</p>
+            <a href="#contact" class="text-xs text-gold mt-3 inline-block">Enquire Now →</a>
+          </div>
+          <div class="border hairline rounded-sm p-5 card-lift bg-white/70">
+            <p class="font-display text-lg">[Service Name]</p>
+            <p class="text-sm text-black/60 mt-1 leading-relaxed">[Short explanation]</p>
+            <a href="#contact" class="text-xs text-gold mt-3 inline-block">Enquire Now →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <p class="text-xs tracking-widest uppercase text-black/40 mb-4">Transport Legal Services</p>
+        <div class="space-y-4">
+          <div class="border hairline rounded-sm p-5 card-lift bg-white/70">
+            <p class="font-display text-lg">[Service Name]</p>
+            <p class="text-sm text-black/60 mt-1 leading-relaxed">[Short explanation]</p>
+            <a href="#contact" class="text-xs text-gold mt-3 inline-block">Enquire Now →</a>
+          </div>
+          <div class="border hairline rounded-sm p-5 card-lift bg-white/70">
+            <p class="font-display text-lg">[Service Name]</p>
+            <p class="text-sm text-black/60 mt-1 leading-relaxed">[Short explanation]</p>
+            <a href="#contact" class="text-xs text-gold mt-3 inline-block">Enquire Now →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <p class="text-xs tracking-widest uppercase text-black/40 mb-4">Digital / Website Services</p>
+        <div class="space-y-4">
+          <div class="border hairline rounded-sm p-5 card-lift bg-white/70">
+            <p class="font-display text-lg">[Service Name]</p>
+            <p class="text-sm text-black/60 mt-1 leading-relaxed">[Short explanation]</p>
+            <a href="#contact" class="text-xs text-gold mt-3 inline-block">Enquire Now →</a>
+          </div>
+          <div class="border hairline rounded-sm p-5 card-lift bg-white/70">
+            <p class="font-display text-lg">[Service Name]</p>
+            <p class="text-sm text-black/60 mt-1 leading-relaxed">[Short explanation]</p>
+            <a href="#contact" class="text-xs text-gold mt-3 inline-block">Enquire Now →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WHY CHOOSE US ===================== -->
+<section id="why" class="py-24 md:py-32 navy-bg">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="article-rule reveal"><p class="article-mark">Article IV — Why Choose Us</p></div>
+    <h2 class="font-display text-3xl md:text-4xl reveal" style="color:#F7F4EE;">Built on <span class="text-gold italic">Trust</span></h2>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
+      <div class="reveal card-lift border hairline rounded-sm p-6 navy2-bg">
+        <p class="font-display text-xl text-gold mb-2">Experienced Professionals</p>
+        <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter description]</p>
+      </div>
+      <div class="reveal card-lift border hairline rounded-sm p-6 navy2-bg">
+        <p class="font-display text-xl text-gold mb-2">Personalized Guidance</p>
+        <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter description]</p>
+      </div>
+      <div class="reveal card-lift border hairline rounded-sm p-6 navy2-bg">
+        <p class="font-display text-xl text-gold mb-2">Transparent Communication</p>
+        <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter description]</p>
+      </div>
+      <div class="reveal card-lift border hairline rounded-sm p-6 navy2-bg">
+        <p class="font-display text-xl text-gold mb-2">Quick Response</p>
+        <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter description]</p>
+      </div>
+      <div class="reveal card-lift border hairline rounded-sm p-6 navy2-bg">
+        <p class="font-display text-xl text-gold mb-2">Client Confidentiality</p>
+        <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter description]</p>
+      </div>
+      <div class="reveal card-lift border hairline rounded-sm p-6 navy2-bg">
+        <p class="font-display text-xl text-gold mb-2">Professional & Reliable Service</p>
+        <p class="text-sm leading-relaxed" style="color:#C9C2B4;">[Enter description]</p>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="mt-24">
+      <div class="article-rule reveal"><p class="article-mark">Article V — Process</p></div>
+      <h3 class="font-display text-2xl md:text-3xl reveal" style="color:#F7F4EE;">How It <span class="text-gold italic">Works</span></h3>
+
+      <div class="grid md:grid-cols-4 gap-6 mt-12 relative">
+        <div class="hidden md:block absolute top-6 left-[12%] right-[12%] h-px" style="background:var(--hairline);"></div>
+        <div class="reveal relative">
+          <p class="font-display text-3xl text-gold mb-3">01</p>
+          <p class="font-semibold" style="color:#F7F4EE;">Choose Your Service</p>
+          <p class="text-sm mt-2 leading-relaxed" style="color:#B7AF9E;">Select the service you require.</p>
+        </div>
+        <div class="reveal relative">
+          <p class="font-display text-3xl text-gold mb-3">02</p>
+          <p class="font-semibold" style="color:#F7F4EE;">Contact Our Expert</p>
+          <p class="text-sm mt-2 leading-relaxed" style="color:#B7AF9E;">Connect with the appropriate professional.</p>
+        </div>
+        <div class="reveal relative">
+          <p class="font-display text-3xl text-gold mb-3">03</p>
+          <p class="font-semibold" style="color:#F7F4EE;">Discuss Your Requirement</p>
+          <p class="text-sm mt-2 leading-relaxed" style="color:#B7AF9E;">Explain your case, project or problem.</p>
+        </div>
+        <div class="reveal relative">
+          <p class="font-display text-3xl text-gold mb-3">04</p>
+          <p class="font-semibold" style="color:#F7F4EE;">Get Professional Assistance</p>
+          <p class="text-sm mt-2 leading-relaxed" style="color:#B7AF9E;">Receive guidance and next steps.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section id="testimonials" class="py-24 md:py-32">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="article-rule reveal"><p class="article-mark">Article VI — Testimonials</p></div>
+    <h2 class="font-display text-3xl md:text-4xl reveal">Client <span class="text-gold italic">Feedback</span></h2>
+    <p class="text-sm text-black/50 mt-3 reveal">Placeholder entries below — to be replaced with genuine client testimonials once received.</p>
+
+    <div class="grid md:grid-cols-3 gap-6 mt-12">
+      <div class="reveal border hairline rounded-sm p-6 bg-white/70 relative">
+        <span class="text-xs uppercase tracking-wide text-gold">Placeholder</span>
+        <p class="font-display italic text-lg mt-3 leading-relaxed">"[Client Testimonial]"</p>
+        <p class="text-sm text-black/50 mt-4">— [Client Name]</p>
+      </div>
+      <div class="reveal border hairline rounded-sm p-6 bg-white/70 relative">
+        <span class="text-xs uppercase tracking-wide text-gold">Placeholder</span>
+        <p class="font-display italic text-lg mt-3 leading-relaxed">"[Client Testimonial]"</p>
+        <p class="text-sm text-black/50 mt-4">— [Client Name]</p>
+      </div>
+      <div class="reveal border hairline rounded-sm p-6 bg-white/70 relative">
+        <span class="text-xs uppercase tracking-wide text-gold">Placeholder</span>
+        <p class="font-display italic text-lg mt-3 leading-relaxed">"[Client Testimonial]"</p>
+        <p class="text-sm text-black/50 mt-4">— [Client Name]</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section id="faq" class="py-24 md:py-32 navy-bg">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 max-w-4xl">
+    <div class="article-rule reveal"><p class="article-mark">Article VII — Frequently Asked</p></div>
+    <h2 class="font-display text-3xl md:text-4xl reveal" style="color:#F7F4EE;">Questions & <span class="text-gold italic">Answers</span></h2>
+
+    <div class="mt-12 divide-y hairline border-t border-b hairline" id="faq-list">
+      <!-- FAQ items generated via JS below for brevity, but written here for clarity -->
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact" class="py-24 md:py-32">
+  <div class="max-w-7xl mx-auto px-5 md:px-8">
+    <div class="article-rule reveal"><p class="article-mark">Article VIII — Contact</p></div>
+    <h2 class="font-display text-3xl md:text-4xl reveal">Get In <span class="text-gold italic">Touch</span></h2>
+
+    <div class="grid lg:grid-cols-2 gap-14 mt-14">
+      <div class="reveal space-y-8">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-black/40 mb-1">Office Address</p>
+          <p class="text-[15px]">[Enter Address]</p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-8">
+          <div>
+            <p class="text-xs uppercase tracking-wide text-black/40 mb-1">Phone</p>
+            <p class="text-[15px]">[Phone]</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-black/40 mb-1">WhatsApp</p>
+            <p class="text-[15px]">[WhatsApp]</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-black/40 mb-1">Email</p>
+            <p class="text-[15px]">[Email]</p>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-black/40 mb-1">Office Hours</p>
+            <p class="text-[15px]">[Enter Hours]</p>
+          </div>
+        </div>
+        <div class="border hairline rounded-sm overflow-hidden h-56 flex items-center justify-center text-black/30 text-sm bg-black/5">
+          [Google Maps Embed Placeholder]
+        </div>
+      </div>
+
+      <form id="contact-form" class="reveal border hairline rounded-sm p-7 bg-white/70 space-y-4">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs uppercase tracking-wide text-black/50">Name</label>
+            <input name="name" required type="text" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm" />
+          </div>
+          <div>
+            <label class="text-xs uppercase tracking-wide text-black/50">Phone</label>
+            <input name="phone" required type="tel" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm" />
+          </div>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-wide text-black/50">Email</label>
+          <input name="email" required type="email" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm" />
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-wide text-black/50">Type of Enquiry</label>
+          <select name="enquiryType" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm">
+            <option value="legal">Legal Consultation</option>
+            <option value="website">Website Development Request</option>
+          </select>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs uppercase tracking-wide text-black/50">Select Service</label>
+            <select name="service" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm">
+              <option>[Service Option 1]</option>
+              <option>[Service Option 2]</option>
+              <option>[Service Option 3]</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs uppercase tracking-wide text-black/50">Preferred Lawyer</label>
+            <select name="preferredLawyer" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm">
+              <option>[Lawyer 1 Name]</option>
+              <option>[Lawyer 2 Name]</option>
+              <option>[Lawyer 3 Name]</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs uppercase tracking-wide text-black/50">Message</label>
+          <textarea name="message" rows="4" class="w-full mt-1.5 px-3 py-2.5 rounded-sm text-sm"></textarea>
+        </div>
+        <button type="submit" class="btn-primary w-full py-3 rounded-sm text-sm tracking-wide">Submit</button>
+        <p id="form-success" class="hidden text-sm text-center text-gold pt-2">Thank you. Our team will contact you shortly.</p>
+      </form>
+    </div>
+
+    <p class="mt-16 text-xs text-black/45 max-w-3xl leading-relaxed reveal border-t hairline pt-6">
+      Information provided on this website is for general informational purposes and does not constitute legal advice. A professional consultation should be obtained for advice regarding a specific matter.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="navy-bg border-t hairline pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+    <div>
+      <span class="font-display text-2xl" style="color:#F7F4EE;">Vakeel <span class="text-gold italic">Sahab</span></span>
+      <p class="text-sm mt-3 leading-relaxed" style="color:#B7AF9E;">[Short description of Vakeel Sahab for the footer.]</p>
+      <div class="flex gap-4 mt-5">
+        <a href="[Instagram Link]" aria-label="Instagram" class="text-gold/80 hover:text-gold">IG</a>
+        <a href="[Facebook Link]" aria-label="Facebook" class="text-gold/80 hover:text-gold">FB</a>
+        <a href="[LinkedIn Link]" aria-label="LinkedIn" class="text-gold/80 hover:text-gold">IN</a>
+        <a href="[YouTube Link]" aria-label="YouTube" class="text-gold/80 hover:text-gold">YT</a>
+      </div>
+    </div>
+    <div>
+      <p class="text-xs uppercase tracking-wide text-gold mb-4">Quick Links</p>
+      <ul class="space-y-2 text-sm" style="color:#B7AF9E;">
+        <li><a href="#home" class="hover:text-gold">Home</a></li>
+        <li><a href="#about" class="hover:text-gold">About</a></li>
+        <li><a href="#lawyers" class="hover:text-gold">Our Lawyers</a></li>
+        <li><a href="#services" class="hover:text-gold">Services</a></li>
+        <li><a href="#contact" class="hover:text-gold">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-xs uppercase tracking-wide text-gold mb-4">Services</p>
+      <ul class="space-y-2 text-sm" style="color:#B7AF9E;">
+        <li>[Service 1]</li>
+        <li>[Service 2]</li>
+        <li>[Service 3]</li>
+        <li>[Service 4]</li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-xs uppercase tracking-wide text-gold mb-4">Contact</p>
+      <ul class="space-y-2 text-sm" style="color:#B7AF9E;">
+        <li>[Phone]</li>
+        <li>[Email]</li>
+        <li>[Address]</li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-5 md:px-8 mt-12 pt-6 border-t hairline flex flex-col sm:flex-row justify-between gap-3 text-xs" style="color:#8C8471;">
+    <p>© <span id="year"></span> Vakeel Sahab. All Rights Reserved.</p>
+    <div class="flex gap-4">
+      <a href="#" class="hover:text-gold">Privacy Policy</a>
+      <a href="#" class="hover:text-gold">Terms & Conditions</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ===================== WHATSAPP FLOAT ===================== -->
+<a id="whatsapp-float" href="#" target="_blank" rel="noopener"
+   class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gold flex items-center justify-center">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="#0F1B2D"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C22 6.45 17.5 2 12.04 2zm5.83 14.09c-.24.68-1.4 1.3-1.93 1.38-.5.08-1.14.11-1.83-.11-.42-.13-.96-.31-1.65-.6-2.9-1.25-4.79-4.17-4.94-4.36-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.02-2.41.26-.28.56-.35.75-.35.19 0 .38 0 .54.01.17.01.4-.07.63.48.24.57.81 1.98.88 2.13.07.14.11.31.02.5-.09.19-.14.31-.28.48-.14.17-.29.37-.41.5-.14.14-.28.29-.12.56.16.28.71 1.17 1.53 1.89 1.05.94 1.94 1.23 2.21 1.37.28.14.44.12.6-.07.17-.19.71-.83.9-1.11.19-.28.38-.23.63-.14.26.09 1.65.78 1.93.92.28.14.47.21.53.33.07.12.07.68-.17 1.36z"/></svg>
+</a>
+
+<!-- Chatbot widget -->
+<button id="chat-toggle" aria-label="Open chat">💬</button>
+<div id="chat-panel">
+  <div id="chat-header">Ask Vakeel Sahab</div>
+  <div id="chat-messages"></div>
+  <div id="chat-input-row">
+    <input id="chat-input" type="text" placeholder="Type your question..." />
+    <button id="chat-send">Send</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/chatbot-widget.js"></script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Mobile menu
+  const menuBtn = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+  menuBtn.addEventListener('click', () => {
+    const isOpen = !mobileMenu.classList.contains('hidden');
+    mobileMenu.classList.toggle('hidden');
+    iconOpen.classList.toggle('hidden');
+    iconClose.classList.toggle('hidden');
+    menuBtn.setAttribute('aria-expanded', String(!isOpen));
+  });
+  document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => {
+    mobileMenu.classList.add('hidden');
+    iconOpen.classList.remove('hidden');
+    iconClose.classList.add('hidden');
+  }));
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
+
+  // Lawyer profile expand/collapse
+  document.querySelectorAll('.view-profile-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const wasOpen = target.classList.contains('open');
+      document.querySelectorAll('.profile-panel').forEach(p => p.classList.remove('open'));
+      if (!wasOpen) {
+        target.classList.add('open');
+        setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+      }
+    });
+  });
+
+  // FAQ data + render
+  const faqData = [
+    { q: "What services does Vakeel Sahab provide?", a: "[Enter Answer]" },
+    { q: "How can I contact a lawyer?", a: "[Enter Answer]" },
+    { q: "Can I book a consultation online?", a: "[Enter Answer]" },
+    { q: "Do you provide transport-related legal assistance?", a: "[Enter Answer]" },
+    { q: "Do you provide website development services?", a: "[Enter Answer]" },
+    { q: "Where is your office located?", a: "[Enter Answer]" },
+    { q: "What documents should I bring for consultation?", a: "[Enter Answer]" },
+    { q: "What are the consultation charges?", a: "[Enter Answer]" },
+    { q: "How quickly can I receive assistance?", a: "[Enter Answer]" },
+  ];
+  const faqList = document.getElementById('faq-list');
+  faqData.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'faq-item py-5 reveal';
+    div.innerHTML = `
+      <button class="faq-toggle w-full flex items-center justify-between text-left gap-4">
+        <span class="font-display text-lg md:text-xl" style="color:#F7F4EE;">${item.q}</span>
+        <span class="faq-icon shrink-0 text-gold text-2xl leading-none transition-transform duration-300">+</span>
+      </button>
+      <div class="faq-answer">
+        <p class="text-sm pt-3 leading-relaxed" style="color:#C9C2B4;">${item.a}</p>
+      </div>
+    `;
+    faqList.appendChild(div);
+    io.observe(div);
+  });
+  faqList.addEventListener('click', (e) => {
+    const btn = e.target.closest('.faq-toggle');
+    if (!btn) return;
+    const item = btn.closest('.faq-item');
+    item.classList.toggle('open');
+  });
+
+  // WhatsApp pre-filled message
+  const waNumber = "[WhatsApp Number]"; // digits only, e.g. 919999999999
+  const waMsg = encodeURIComponent("Hello Vakeel Sahab, I would like to enquire about [SERVICE].");
+  document.getElementById('whatsapp-float').href = `https://wa.me/${waNumber.replace(/\D/g,'')}?text=${waMsg}`;
+
+  // Contact form fake submit
+  document.getElementById('contact-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      await apiRequest('/public/contact', {
+        method: 'POST',
+        auth: false,
+        body: {
+          name: form.querySelector('[name="name"]').value,
+          phone: form.querySelector('[name="phone"]').value,
+          email: form.querySelector('[name="email"]').value,
+          service: form.querySelector('[name="service"]').value,
+          message: form.querySelector('[name="message"]').value,
+          isWebsiteRequest: form.querySelector('[name="enquiryType"]').value === 'website',
+        },
+      });
+      document.getElementById('form-success').classList.remove('hidden');
+      form.reset();
+    } catch (err) {
+      alert(err.message || 'Could not submit your enquiry. Please try again.');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  // Navbar shadow on scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.style.boxShadow = window.scrollY > 20 ? '0 10px 30px -15px rgba(0,0,0,0.4)' : 'none';
+  });
+</script>
+
+</body>
+</html>

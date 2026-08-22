@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Developer Dashboard | Vakeel Sahab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/dashboard.css">
+<style>
+  header.topbar{background:var(--navy); color:var(--paper); padding:18px 28px; display:flex; align-items:center; justify-content:space-between;}
+  main{max-width:960px; margin:0 auto; padding:36px 20px 80px;}
+  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:6px;}
+  .consult-card{padding:18px; margin-bottom:14px;}
+  .consult-meta{font-size:12px; color:rgba(42,40,35,0.5); margin-top:6px;}
+  .actions-row{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  select{padding:8px 10px; font-size:13px;}
+  .tabs{display:flex; gap:6px; margin-bottom:18px;}
+  .tab-link{padding:8px 16px; font-size:13px; border:1px solid rgba(42,40,35,0.15); background:#fff; cursor:pointer;}
+  .tab-link.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .project-card{padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:start; gap:12px;}
+  .project-form{display:grid; gap:10px; max-width:520px; margin-bottom:26px;}
+  .project-form input, .project-form textarea{padding:9px; font-size:14px;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="font-display" style="font-size:20px;">Vakeel <span class="text-gold" style="font-style:italic;">Sahab</span> — Developer</span>
+  <div style="display:flex; align-items:center; gap:16px; font-size:13px;">
+    <span id="welcome-name"></span>
+    <button id="logout-btn" class="btn-outline" style="padding:6px 14px; color:var(--paper); border-color:rgba(247,244,238,0.3);">Log Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="tabs">
+    <button class="tab-link active" data-tab="requests">Website Requests</button>
+    <button class="tab-link" data-tab="portfolio">Portfolio</button>
+  </div>
+
+  <section id="tab-requests">
+    <p class="section-title">Client Enquiries</p>
+    <h2 class="font-display" style="font-size:26px; margin:0 0 16px;">Website Development Requests</h2>
+    <div id="requests-list"><p style="color:rgba(42,40,35,0.5); font-size:14px;">Loading...</p></div>
+  </section>
+
+  <section id="tab-portfolio" style="display:none;">
+    <p class="section-title">Showcase</p>
+    <h2 class="font-display" style="font-size:26px; margin:0 0 16px;">Manage Portfolio</h2>
+
+    <form id="project-form" class="card project-form" style="padding:20px;">
+      <input type="text" id="proj-title" placeholder="Project title" required />
+      <textarea id="proj-desc" rows="3" placeholder="Short description"></textarea>
+      <input type="text" id="proj-link" placeholder="Project link (https://...)" />
+      <button type="submit" class="btn-primary" style="padding:9px 20px;">Add Project</button>
+    </form>
+
+    <div id="projects-list"></div>
+  </section>
+</main>
+
+<script src="js/api.js"></script>
+<script>
+  const user = guardPage('developer');
+  if (user) document.getElementById('welcome-name').textContent = `Welcome, ${user.name}`;
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    clearSession();
+    window.location.href = 'login.html';
+  });
+
+  document.querySelectorAll('.tab-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-requests').style.display = btn.dataset.tab === 'requests' ? 'block' : 'none';
+      document.getElementById('tab-portfolio').style.display = btn.dataset.tab === 'portfolio' ? 'block' : 'none';
+    });
+  });
+
+  function statusBadge(status) {
+    return `<span class="badge badge-${status}">${status.replace('_',' ')}</span>`;
+  }
+
+  async function loadRequests() {
+    const listEl = document.getElementById('requests-list');
+    try {
+      const items = await apiRequest('/developer/requests');
+      if (items.length === 0) {
+        listEl.innerHTML = `<p style="color:rgba(42,40,35,0.5); font-size:14px;">No website requests yet.</p>`;
+        return;
+      }
+      listEl.innerHTML = items.map(c => `
+        <div class="card consult-card" data-id="${c.id}">
+          <div style="display:flex; justify-content:space-between; align-items:start; gap:12px;">
+            <div>
+              <strong>${c.service || 'Website Request'}</strong>
+              <p style="margin:6px 0 0; font-size:14px;">${c.message}</p>
+              <p class="consult-meta">${c.client_name || c.guest_name || 'Client'} · ${c.client_email || c.guest_email || c.guest_phone || ''} · ${new Date(c.created_at).toLocaleDateString()}</p>
+            </div>
+            ${statusBadge(c.status)}
+          </div>
+          <div class="actions-row">
+            <select class="status-select">
+              <option value="pending" ${c.status==='pending'?'selected':''}>Pending</option>
+              <option value="in_progress" ${c.status==='in_progress'?'selected':''}>In Progress</option>
+              <option value="completed" ${c.status==='completed'?'selected':''}>Completed</option>
+              <option value="cancelled" ${c.status==='cancelled'?'selected':''}>Cancelled</option>
+            </select>
+            <button class="btn-outline update-status-btn" style="padding:6px 14px; font-size:13px;">Update Status</button>
+          </div>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.update-status-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const cardEl = e.target.closest('.consult-card');
+          const id = cardEl.dataset.id;
+          const status = cardEl.querySelector('.status-select').value;
+          try {
+            await apiRequest(`/developer/requests/${id}/status`, { method: 'PATCH', body: { status } });
+            loadRequests();
+          } catch (err) { alert(err.message); }
+        });
+      });
+    } catch (err) {
+      listEl.innerHTML = `<p style="color:#8A1D1D; font-size:14px;">${err.message}</p>`;
+    }
+  }
+
+  async function loadProjects() {
+    const listEl = document.getElementById('projects-list');
+    try {
+      const items = await apiRequest('/developer/projects');
+      if (items.length === 0) {
+        listEl.innerHTML = `<p style="color:rgba(42,40,35,0.5); font-size:14px;">No projects added yet.</p>`;
+        return;
+      }
+      listEl.innerHTML = items.map(p => `
+        <div class="card project-card" data-id="${p.id}">
+          <div>
+            <strong>${p.title}</strong>
+            <p style="margin:4px 0; font-size:13px; color:rgba(42,40,35,0.7);">${p.description || ''}</p>
+            ${p.project_link ? `<a href="${p.project_link}" target="_blank" style="font-size:12px; color:var(--gold);">${p.project_link}</a>` : ''}
+          </div>
+          <button class="btn-outline delete-project-btn" style="padding:6px 12px; font-size:12px;">Remove</button>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.delete-project-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = e.target.closest('.project-card').dataset.id;
+          if (!confirm('Remove this project?')) return;
+          try {
+            await apiRequest(`/developer/projects/${id}`, { method: 'DELETE' });
+            loadProjects();
+          } catch (err) { alert(err.message); }
+        });
+      });
+    } catch (err) {
+      listEl.innerHTML = `<p style="color:#8A1D1D; font-size:14px;">${err.message}</p>`;
+    }
+  }
+
+  document.getElementById('project-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await apiRequest('/developer/projects', {
+        method: 'POST',
+        body: {
+          title: document.getElementById('proj-title').value,
+          description: document.getElementById('proj-desc').value,
+          projectLink: document.getElementById('proj-link').value,
+        },
+      });
+      e.target.reset();
+      loadProjects();
+    } catch (err) { alert(err.message); }
+  });
+
+  loadRequests();
+  loadProjects();
+</script>
+</body>
+</html>
