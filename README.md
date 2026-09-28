@@ -1,4 +1,5 @@
 # Vakeel Sahab — Full-Stack Web App
+supabase database password- Arpitharsh11@
 
 A legal-services platform with a public marketing site, an OpenAI-powered chatbot,
 and three role-based dashboards (Client, Lawyer, Developer).
